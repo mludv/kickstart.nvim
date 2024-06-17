@@ -488,6 +488,13 @@ require('lazy').setup({
           --  Symbols are things like variables, functions, types, etc.
           map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
 
+          -- Fuzzy find all the functions in your current document.
+          --  Symbols are things like variables, functions, types, etc.
+          local document_symbols = function()
+            require('telescope.builtin').lsp_document_symbols { symbols = { 'function', 'class' } }
+          end
+          map('<leader>df', document_symbols, '[D]ocument [F]unctions')
+
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
@@ -741,8 +748,11 @@ require('lazy').setup({
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
           ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-j>'] = cmp.mapping.select_next_item(), -- use this as an alias since it's the same in vimium
+
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-k>'] = cmp.mapping.select_prev_item(), -- use this as an alias since it's the same in vimium
 
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
