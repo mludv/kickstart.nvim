@@ -500,7 +500,7 @@ require('lazy').setup({
 
           -- Fuzzy find all the functions and classes in your current workspace.
           local workspace_symbols = function()
-            require('telescope.builtin').lsp_workspace_symbols { symbols = { 'function', 'class' } }
+            require('telescope.builtin').lsp_dynamic_workspace_symbols { symbols = { 'function', 'class' } }
           end
           map('<leader>wf', workspace_symbols, '[W]orkspace [F]unctions')
 
