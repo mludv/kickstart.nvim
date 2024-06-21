@@ -5,6 +5,7 @@
 return {
   {
     'alexghergh/nvim-tmux-navigation',
+    event = 'VeryLazy',
     opts = {
       disable_when_zoomed = false,
       keybindings = {
@@ -44,5 +45,11 @@ return {
     keys = {
       { '<leader>hl', '<cmd>LazyGit<cr>', desc = '[L]azyGit' },
     },
+  },
+  {
+    'luckasRanarison/tailwind-tools.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    event = 'VeryLazy',
+    opts = {}, -- your configuration
   },
 }
