@@ -46,10 +46,10 @@ return {
       { '<leader>hl', '<cmd>LazyGit<cr>', desc = '[L]azyGit' },
     },
   },
-  {
-    'luckasRanarison/tailwind-tools.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    event = 'VeryLazy',
-    opts = {}, -- your configuration
-  },
+  -- {
+  --   'luckasRanarison/tailwind-tools.nvim',
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  --   event = 'VeryLazy',
+  --   opts = {}, -- your configuration
+  -- },
 }
