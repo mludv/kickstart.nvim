@@ -488,9 +488,21 @@ require('lazy').setup({
           --  Symbols are things like variables, functions, types, etc.
           map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
 
+          -- Fuzzy find all the functions and classes in your current document.
+          local document_symbols = function()
+            require('telescope.builtin').lsp_document_symbols { symbols = { 'function', 'class' } }
+          end
+          map('<leader>df', document_symbols, '[D]ocument [F]unctions')
+
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+
+          -- Fuzzy find all the functions and classes in your current workspace.
+          local workspace_symbols = function()
+            require('telescope.builtin').lsp_dynamic_workspace_symbols { symbols = { 'function', 'class' } }
+          end
+          map('<leader>wf', workspace_symbols, '[W]orkspace [F]unctions')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
@@ -568,8 +580,6 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -577,7 +587,8 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
-        --
+        tailwindcss = {},
+        rust_analyzer = {},
         -- Disable linting and import organization in pyright to let ruff handle that instead
         pyright = {
           settings = {
@@ -743,8 +754,11 @@ require('lazy').setup({
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
           ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-j>'] = cmp.mapping.select_next_item(), -- use this as an alias since it's the same in vimium
+
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-k>'] = cmp.mapping.select_prev_item(), -- use this as an alias since it's the same in vimium
 
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
