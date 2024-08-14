@@ -45,7 +45,7 @@ local function code_replace_fewshot(input, context)
   }
 
   return {
-    instruction = 'You are an expert programmer. You are given a snippet of code which includes the symbol <@@>. Complete the correct code that should replace the <@@> symbol given the content. Only respond with the code that should replace the symbol <@@>. If you include any other code, the program will fail to compile and the user will be very sad.',
+    instruction = 'You are an expert programmer. You are given a snippet of code which includes the symbol <@@>. Follow all instructions given in comments and complete the correct code that should replace the <@@> symbol given the content. Only respond with the code that should replace the symbol <@@>. Make sure the number of spaces in the response is the same as in the user request. If you include any other code, the program will fail to compile and the user will be very sad. If you have any comments, add them as comments in the code.',
     fewshot = {
       {
         role = 'user',
@@ -54,6 +54,36 @@ local function code_replace_fewshot(input, context)
       {
         role = 'assistant',
         content = '+ name',
+      },
+    },
+    messages = messages,
+  }
+end
+
+local function code_add_docstring_fewshot(input, context)
+  local content = 'The code:\n```\n' .. input .. '\n```\n'
+
+  if #context.args > 0 then
+    content = content .. '\nInstruction: ' .. context.args
+  end
+
+  local messages = {
+    {
+      role = 'user',
+      content = content,
+    },
+  }
+
+  return {
+    instruction = 'You are an expert programmer. You are given a piece of code containing a function. Update the function with a docstring explaining what the function does in a short and descriptive way together with the parameters in numpy style. Also add comments to any part of the code that is difficult to understand (otherwise leave out unneccessary comments). Only respond with the code that should replace the existing code. Make sure the number of spaces in the response is the same as in the user request. If you include any other code, the program will fail to compile and the user might get fired.',
+    fewshot = {
+      {
+        role = 'user',
+        content = 'The code:\n```\ndef greeting():\n    print("hello " + name)\n```',
+      },
+      {
+        role = 'assistant',
+        content = 'def greeting():\n    """\n    Prints a greeting.\n\n    Parameters\n    ----------\n    name : str\n        The name to greet.\n    """\n    print("hello " + name)\n',
       },
     },
     messages = messages,
@@ -179,6 +209,23 @@ local prompt_library = {
               .. git_diff
               .. '\n```',
           },
+        },
+      }
+    end,
+  },
+  docstring = {
+    provider = maxllm,
+    mode = mode.REPLACE,
+    builder = function(input, context)
+      local standard_prompt = code_add_docstring_fewshot(input, context)
+      local messages = util.table.flatten {
+        standard_prompt.fewshot,
+        standard_prompt.messages,
+      }
+      return {
+        data = messages,
+        config = {
+          system = standard_prompt.instruction,
         },
       }
     end,
