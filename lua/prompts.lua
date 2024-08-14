@@ -2,26 +2,27 @@ local openai = require 'model.providers.openai'
 
 -- prompt helpers
 local extract = require 'model.prompts.extract'
-local consult = require 'model.prompts.consult'
 
 -- utils
 local util = require 'model.util'
-local async = require 'model.util.async'
 local prompts = require 'model.util.prompts'
 local mode = require('model').mode
 
-local system_prompt = [[
-You are an AI programming assistant integrated into a code editor. Your purpose is to help the user with programming tasks as they write code.
-Key capabilities:
-- Thoroughly analyze the user's code and provide insightful suggestions for improvements related to best practices, performance, readability, and maintainability. Explain your reasoning.
-- Answer coding questions in detail, using examples from the user's own code when relevant. Break down complex topics step- Spot potential bugs and logical errors. Alert the user and suggest fixes.
-- Upon request, add helpful comments explaining complex or unclear code.
-- Suggest relevant documentation, StackOverflow answers, and other resources related to the user's code and questions.
-- Engage in back-and-forth conversations to understand the user's intent and provide the most helpful information.
-- Keep concise and use markdown.
-- When asked to create code, only generate the code. No bugs.
-- Think step by step
-]]
+-- local system_prompt = [[
+-- You are an AI programming assistant integrated into a code editor. Your purpose is to help the user with programming tasks as they write code.
+-- Key capabilities:
+-- - Thoroughly analyze the user's code and provide insightful suggestions for improvements related to best practices, performance, readability, and maintainability. Explain your reasoning.
+-- - Answer coding questions in detail, using examples from the user's own code when relevant. Break down complex topics step- Spot potential bugs and logical errors. Alert the user and suggest fixes.
+-- - Upon request, add helpful comments explaining complex or unclear code.
+-- - Suggest relevant documentation, StackOverflow answers, and other resources related to the user's code and questions.
+-- - Engage in back-and-forth conversations to understand the user's intent and provide the most helpful information.
+-- - Keep concise and use markdown.
+-- - When asked to create code, only generate the code. No bugs.
+-- - Think step by step
+-- ]]
+-- Multiline system prompts doesn't work for some reason...
+local system_prompt =
+  'You are an AI programming assistant integrated into a code editor. Your purpose is to help the user with programming tasks as they write code.'
 
 local function code_replace_fewshot(input, context)
   local surrounding_text = prompts.limit_before_after(context, 30)
@@ -63,30 +64,50 @@ local function input_if_selection(input, context)
   return context.selection and input or ''
 end
 
-local Job = require 'plenary.job'
-
-local test_provider = {
+local maxllm = {
   request_completion = function(handlers, params, options)
-    Job:new({
-      command = '/Users/max/Projects/test.sh',
-      on_stdout = function(err, data)
-        if err then
-          print 'error'
-          print(err)
-        else
+    -- vim.notify(vim.inspect { params = params, options = options })
+    local cmd = {
+      'maxllm',
+      '--data',
+      vim.json.encode(params.data),
+    }
+    if params.config and params.config.system then
+      table.insert(cmd, '--system-prompt')
+      table.insert(cmd, params.config.system)
+    end
+    vim.notify(vim.inspect(cmd))
+    vim.system(cmd, {
+      timeout = 10000,
+      stdout = function(err, data)
+        if data then
           handlers.on_partial(data)
         end
       end,
-      on_exit = function(j, return_val)
-        handlers.on_finish()
+      stderr = function(err, data)
+        if data then
+          handlers.on_error(data)
+        end
+        if err then
+          handlers.on_error(err)
+        end
       end,
-    }):start()
-    -- vim.notify(vim.inspect { params = params, options = options })
+    }, function()
+      handlers.on_finish()
+    end)
   end,
 }
 
 ---@type table<string, ChatPrompt>
 local chats = {
+  pulsar = {
+    provider = maxllm,
+    system = system_prompt,
+    create = input_if_selection,
+    run = function(messages, config)
+      return { data = messages, config = config }
+    end,
+  },
   gpt4 = {
     provider = openai,
     system = system_prompt,
@@ -109,12 +130,21 @@ local chats = {
 
 ---@type table<string, Prompt>
 local prompt_library = {
-  test_prompt = {
-    provider = test_provider,
+  preplace = {
+    provider = maxllm,
+    mode = mode.INSERT_OR_REPLACE,
+    transform = extract.markdown_code,
     builder = function(input, context)
+      local standard_prompt = code_replace_fewshot(input, context)
+      local messages = util.table.flatten {
+        standard_prompt.fewshot,
+        standard_prompt.messages,
+      }
       return {
-        input = input,
-        context = context,
+        data = messages,
+        config = {
+          system = standard_prompt.instruction,
+        },
       }
     end,
   },
@@ -124,7 +154,7 @@ local prompt_library = {
     params = {
       temperature = 0.2,
       max_tokens = 1000,
-      model = 'gpt-4',
+      model = 'gpt-4o',
     },
     builder = function(input, context)
       return openai.adapt(code_replace_fewshot(input, context))
@@ -132,7 +162,7 @@ local prompt_library = {
     transform = extract.markdown_code,
   },
   commit = {
-    provider = openai,
+    provider = maxllm,
     mode = mode.INSERT,
     builder = function()
       local git_diff = vim.fn.system { 'git', 'diff', '--staged' }
@@ -142,7 +172,7 @@ local prompt_library = {
       end
 
       return {
-        messages = {
+        data = {
           {
             role = 'user',
             content = 'Write a terse commit message according to the Conventional Commits specification. Try to stay below 80 characters total. Staged git diff: ```\n'
