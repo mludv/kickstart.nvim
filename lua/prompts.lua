@@ -76,7 +76,7 @@ local maxllm = {
       table.insert(cmd, '--system-prompt')
       table.insert(cmd, params.config.system)
     end
-    vim.notify(vim.inspect(cmd))
+    -- vim.notify(vim.inspect(cmd))
     vim.system(cmd, {
       timeout = 10000,
       stdout = function(err, data)
