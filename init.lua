@@ -412,6 +412,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+      vim.keymap.set('n', '<leader>sl', function()
+        builtin.find_files { cwd = vim.fn.stdpath 'data' .. '/model' }
+      end, { desc = '[S]earch [L]lm chat files' })
     end,
   },
 
@@ -592,8 +595,9 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
-        tailwindcss = {},
+        tsserver = {},
+        -- tailwindcss = {},
+        svelte = {},
         rust_analyzer = {},
         -- Disable linting and import organization in pyright to let ruff handle that instead
         pyright = {

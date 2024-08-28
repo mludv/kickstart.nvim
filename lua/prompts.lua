@@ -99,6 +99,7 @@ local maxllm = {
     -- vim.notify(vim.inspect { params = params, options = options })
     local cmd = {
       'maxllm',
+      '--verbose',
       '--data',
       vim.json.encode(params.data),
     }
@@ -108,7 +109,7 @@ local maxllm = {
     end
     -- vim.notify(vim.inspect(cmd))
     vim.system(cmd, {
-      timeout = 10000,
+      timeout = 600000,
       stdout = function(err, data)
         if data then
           handlers.on_partial(data)
@@ -116,10 +117,12 @@ local maxllm = {
       end,
       stderr = function(err, data)
         if data then
-          handlers.on_error(data)
+          print(data)
+          -- handlers.on_error(data)
         end
         if err then
-          handlers.on_error(err)
+          print(data)
+          -- handlers.on_error(err)
         end
       end,
     }, function()
@@ -150,6 +153,7 @@ local chats = {
         table.insert(messages, 1, {
           role = 'system',
           content = config.system,
+          prompts,
         })
       end
 
