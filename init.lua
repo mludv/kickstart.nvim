@@ -102,7 +102,7 @@ vim.g.have_nerd_font = true
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -175,6 +175,11 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+-- Terminal settings
+vim.api.nvim_create_autocmd('TermOpen', { pattern = '*', command = 'startinsert' }) -- starts in insert mode
+vim.api.nvim_create_autocmd('TermOpen', { pattern = '*', command = 'setlocal nonumber norelativenumber' }) -- no numbers
+vim.api.nvim_create_autocmd('TermEnter', { pattern = '*', command = 'setlocal signcolumn=no' }) -- no sign column
+
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
@@ -193,13 +198,11 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 -- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Increase split size
-vim.keymap.set('n', '<C-Up>', ':resize +2<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<C-Left>', ':vertical resize +2<CR>', { noremap = true, silent = true })
-
--- Decrease split size
-vim.keymap.set('n', '<C-Down>', ':resize -2<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<C-Right>', ':vertical resize -2<CR>', { noremap = true, silent = true })
+-- Split size
+vim.keymap.set('n', '<M-h>', ':vertical resize +4<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<M-j>', ':resize +4<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<M-k>', ':resize -4<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<M-l>', ':vertical resize -4<CR>', { noremap = true, silent = true })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -595,19 +598,24 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        ts_ls = {},
         -- tailwindcss = {},
         svelte = {},
         rust_analyzer = {},
         -- Disable linting and import organization in pyright to let ruff handle that instead
-        pyright = {
+        basedpyright = {
           settings = {
-            pyright = {
+            basedpyright = {
               disableOrganizeImports = true,
+              typeCheckingMode = 'standard',
             },
-            python = {
-              analysis = {
-                ignore = { '*' },
+          },
+          capabilities = {
+            textDocument = {
+              publishDiagnostics = {
+                tagSupport = {
+                  valueSet = { 2 },
+                },
               },
             },
           },
@@ -868,6 +876,12 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup {
+        custom_surroundings = {
+          c = {
+            input = { '```\n().-()\n```' },
+            output = { left = '```\n', right = '\n```' },
+          },
+        },
         -- Module mappings. Use `''` (empty string) to disable one.
         mappings = {
           add = 'gsa', -- Add surrounding in Normal and Visual modes

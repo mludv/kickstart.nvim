@@ -2,6 +2,7 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
+---@type LazySpec
 return {
   {
     'alexghergh/nvim-tmux-navigation',
@@ -17,6 +18,15 @@ return {
         -- next = "<C-Space>",
       },
     },
+    config = function(_, opts)
+      local ntn = require 'nvim-tmux-navigation'
+      ntn.setup(opts)
+
+      vim.keymap.set('t', '<C-h>', ntn.NvimTmuxNavigateLeft, { remap = true })
+      vim.keymap.set('t', '<C-j>', ntn.NvimTmuxNavigateDown, { remap = true })
+      vim.keymap.set('t', '<C-k>', ntn.NvimTmuxNavigateUp, { remap = true })
+      vim.keymap.set('t', '<C-l>', ntn.NvimTmuxNavigateRight, { remap = true })
+    end,
   },
   {
     'stevearc/oil.nvim',
@@ -27,25 +37,28 @@ return {
     -- Optional dependencies
     dependencies = { 'nvim-tree/nvim-web-devicons' },
   },
-  {
-    'kdheepak/lazygit.nvim',
-    cmd = {
-      'LazyGit',
-      'LazyGitConfig',
-      'LazyGitCurrentFile',
-      'LazyGitFilter',
-      'LazyGitFilterCurrentFile',
-    },
-    -- optional for floating window border decoration
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-    },
-    -- setting the keybinding for LazyGit with 'keys' is recommended in
-    -- order to load the plugin when the command is run for the first time
-    keys = {
-      { '<leader>hl', '<cmd>LazyGit<cr>', desc = '[L]azyGit' },
-    },
-  },
+  { 'akinsho/toggleterm.nvim', version = '*', opts = {}, keys = {
+    { '<leader>tt', ':ToggleTerm dir=gitdir', mode = 'n', desc = '[T]oggle terminal' },
+  } },
+  -- {
+  --   'kdheepak/lazygit.nvim',
+  --   cmd = {
+  --     'LazyGit',
+  --     'LazyGitConfig',
+  --     'LazyGitCurrentFile',
+  --     'LazyGitFilter',
+  --     'LazyGitFilterCurrentFile',
+  --   },
+  --   -- optional for floating window border decoration
+  --   dependencies = {
+  --     'nvim-lua/plenary.nvim',
+  --   },
+  --   -- setting the keybinding for LazyGit with 'keys' is recommended in
+  --   -- order to load the plugin when the command is run for the first time
+  --   keys = {
+  --     { '<leader>hl', '<cmd>LazyGit<cr>', desc = '[L]azyGit' },
+  --   },
+  -- },
   -- {
   --   'luckasRanarison/tailwind-tools.nvim',
   --   dependencies = { 'nvim-treesitter/nvim-treesitter' },

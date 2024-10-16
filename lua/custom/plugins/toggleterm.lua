@@ -1,0 +1,43 @@
+local terminals = {}
+
+---@type LazySpec
+return {
+  -- {
+  --   'akinsho/toggleterm.nvim',
+  --   version = '*',
+  --   config = function()
+  --     require('toggleterm').setup {}
+  --
+  --     local Terminal = require('toggleterm.terminal').Terminal
+  --     terminals['ipython'] = Terminal:new { cmd = 'ipython', direction = 'float', count = 2 }
+  --   end,
+  --   keys = {
+  --     {
+  --       [[<c-\>]],
+  --       function()
+  --         terminals['ipython']:toggle()
+  --       end,
+  --       mode = { 'n', 'i', 't' },
+  --       desc = '[T]oggle IPython',
+  --     },
+  --     {
+  --       '<leader>tt',
+  --       function()
+  --         local trim_spaces = true
+  --         local term = terminals['ipython']
+  --
+  --         if not term:is_open() then
+  --           term:open(nil, 'float')
+  --         end
+  --         term:send { '%cpaste', '1+1', '--' }
+  --
+  --         -- require('toggleterm').exec('%paste', 2)
+  --         -- require('toggleterm').send_lines_to_terminal('visual_selection', trim_spaces, { args = 2 })
+  --       end,
+  --       mode = 'v',
+  --       ft = 'python',
+  --       desc = 'Send to [T]erminal',
+  --     },
+  --   },
+  -- },
+}
