@@ -712,6 +712,7 @@ require('lazy').setup({
         -- is found.
         javascript = { 'prettier' },
         json = { 'prettier' },
+        sql = { 'sleek' },
       },
     },
   },
@@ -757,6 +758,8 @@ require('lazy').setup({
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
+
+      require 'custom.snippets'
 
       cmp.setup {
         snippet = {
