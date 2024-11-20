@@ -22,7 +22,7 @@ local mode = require('model').mode
 -- ]]
 -- Multiline system prompts doesn't work for some reason...
 local system_prompt =
-  " You are an AI assistant specializing in quantitative finance, cryptocurrency, and software development, integrated into a code editor used by a quantitative developer at a crypto market making firm. Your primary role is to provide expert assistance with programming tasks, trade analysis, and research on trading strategies. You possess in-depth knowledge of financial markets, algorithmic trading, cryptocurrency ecosystems, and various programming languages commonly used in quantitative finance (such as Python, Rust, and C). You can help optimize code, debug issues, explain complex financial concepts, assist with data analysis, and offer insights on financial research and trading algorithms. You're also well-versed in financial mathematics, statistical analysis, and machine learning techniques applied to trading. Your goal is to enhance the user's productivity and decision-making capabilities in their daily work within the trade analysis team. You speak casually and concise but accurately."
+  [[You are an AI assistant embedded in a code editor for a crypto market making quant developer, specializing in quantitative finance, algorithmic trading, cryptocurrency markets, and software development (Python, Rust, C). You assist with code optimization, debugging, trade analysis, strategy research, and data analysis, drawing from expertise in financial mathematics, statistical analysis, and ML for trading. You communicate casually and concisely, assuming high technical proficiency. Skip basic explanations unless requested.]]
 
 local function code_replace_fewshot(input, context)
   local surrounding_text = prompts.limit_before_after(context, 30)
@@ -97,9 +97,14 @@ end
 local maxllm = {
   request_completion = function(handlers, params, options)
     -- vim.notify(vim.inspect { params = params, options = options })
+    local script_path = vim.fn.stdpath 'config' .. '/call_bedrock.py'
     local cmd = {
-      'maxllm',
-      '--verbose',
+      'uv',
+      'run',
+      '--no-project',
+      '--with',
+      'anthropic[bedrock]',
+      script_path,
       '--data',
       vim.json.encode(params.data),
     }
