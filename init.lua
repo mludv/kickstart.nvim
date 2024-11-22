@@ -166,6 +166,11 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', 'j', 'gj', { remap = false })
 vim.keymap.set('n', 'k', 'gk', { remap = false })
 
+-- navigate tabs
+vim.keymap.set('n', '<leader>n', ':tabnew<CR>', { desc = '[N]ew tab' })
+vim.keymap.set('n', 'H', ':tabprevious<CR>', { desc = 'Previous tab' })
+vim.keymap.set('n', 'L', ':tabnext<CR>', { desc = 'Next tab' })
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
@@ -222,6 +227,29 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- WSL clipboard
+local function is_wsl()
+  local output = vim.fn.systemlist 'uname -r'
+  return output[1] and output[1]:lower():find 'microsoft' and true or false
+end
+
+if is_wsl() then
+  vim.g.clipboard = {
+    name = 'WslClipboard',
+    copy = {
+      ['+'] = 'clip.exe',
+      ['*'] = 'clip.exe',
+    },
+    paste = {
+      ['+'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+      ['*'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    },
+    cache_enabled = 0,
+  }
+else
+  vim.opt.clipboard = 'unnamedplus' -- Will use xclip/wl-clipboard/etc when available
+end
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info

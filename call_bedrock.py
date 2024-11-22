@@ -35,7 +35,8 @@ def main(args):
     messages = json.loads(args.data)
 
     with client.messages.stream(
-        max_tokens=2048,
+        # max_tokens=2048,
+        max_tokens=8192,
         model="anthropic.claude-3-5-sonnet-20241022-v2:0",
         system=args.system_prompt or 'You are a helpful assistant',
         messages=messages,
