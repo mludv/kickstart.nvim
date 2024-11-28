@@ -234,7 +234,7 @@ local function is_wsl()
   return output[1] and output[1]:lower():find 'microsoft' and true or false
 end
 
-if is_wsl() then
+if not vim.env.TMUX and is_wsl() then
   vim.g.clipboard = {
     name = 'WslClipboard',
     copy = {

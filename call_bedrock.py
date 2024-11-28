@@ -8,6 +8,11 @@ from anthropic import AnthropicBedrock
 AWS_ACCESS_KEY_ID = os.getenv("BEDROCK_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY= os.getenv("BEDROCK_SECRET_ACCESS_KEY")
 
+MODEL_ID = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+REGION = "us-west-2"
+# MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+# REGION = "us-east-1"
+
 if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
     raise RuntimeError("Provide env variables BEDROCK_ACCESS_KEY_ID and BEDROCK_SECRET_ACCESS_KEY")
 
@@ -28,16 +33,16 @@ def main(args):
         # Temporary credentials can be used with aws_session_token.
         # Read more at https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html.
         # and if that's not present, we default to us-east-1. Note that we do not read ~/.aws/config for the region.
-        aws_region="us-west-2",
+        aws_region=REGION,
         http_client=http_client,
     )
 
-    messages = json.loads(args.data)
+    messages = json.loads(args.data) if args.data else [{"role": "user", "content": "Hello!!"}]
 
     with client.messages.stream(
         # max_tokens=2048,
         max_tokens=8192,
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        model=MODEL_ID,
         system=args.system_prompt or 'You are a helpful assistant',
         messages=messages,
     ) as stream:
@@ -48,7 +53,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", help='The JSON encoded messages to send to anthropic.', required=True)
+    parser.add_argument("--data", help='The JSON encoded messages to send to anthropic.')
     parser.add_argument("--system-prompt", help='A system prompt to add to the request.')
 
     args = parser.parse_args()
