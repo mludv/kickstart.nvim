@@ -632,7 +632,8 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         ts_ls = {},
-        -- tailwindcss = {},
+        tailwindcss = {},
+        lexical = {},
         svelte = {},
         rust_analyzer = {},
         -- Disable linting and import organization in pyright to let ruff handle that instead
